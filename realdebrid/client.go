@@ -254,20 +254,20 @@ func (c *Client) DeleteTorrent(ctx context.Context, id string) error {
 
 // GetStreamTranscodings fetches and returns transcodings (M3U8, Dash, etc.) for a file added to RD
 // The ID must be the one returned from RealDebrid through /downloads or /unrestrict/link
-func (c *Client) GetStreamTranscodings(ctx context.Context, id string) (Transcodings, error) {
-	c.logger.Debug("Getting stream transcodings...", zapDebridService)
-
-	resBytes, err := c.get(ctx, c.opts.BaseURL+"/streaming/transcode/"+id, nil)
-	fmt.Printf("/streaming/transcode/%+v returned: %+v", id, string(resBytes))
-
-	if err != nil {
-		return Transcodings{}, fmt.Errorf("couldn't get stream transcodings: %w", err)
-	}
-	tcodes := Transcodings{}
-	if err = json.Unmarshal(resBytes, &tcodes); err != nil {
-		return Transcodings{}, fmt.Errorf("couldn't unmarshal stream transcodings: %w", err)
-	}
-
-	c.logger.Debug("Got stream transcodings", zap.String("streamTranscodings", fmt.Sprintf("%+v", tcodes)), zapDebridService)
-	return tcodes, nil
-}
+// func (c *Client) GetStreamTranscodings(ctx context.Context, id string) (Transcodings, error) {
+// 	c.logger.Debug("Getting stream transcodings...", zapDebridService)
+//
+// 	resBytes, err := c.get(ctx, c.opts.BaseURL+"/streaming/transcode/"+id, nil)
+// 	fmt.Printf("/streaming/transcode/%+v returned: %+v", id, string(resBytes))
+//
+// 	if err != nil {
+// 		return Transcodings{}, fmt.Errorf("couldn't get stream transcodings: %w", err)
+// 	}
+// 	tcodes := Transcodings{}
+// 	if err = json.Unmarshal(resBytes, &tcodes); err != nil {
+// 		return Transcodings{}, fmt.Errorf("couldn't unmarshal stream transcodings: %w", err)
+// 	}
+//
+// 	c.logger.Debug("Got stream transcodings", zap.String("streamTranscodings", fmt.Sprintf("%+v", tcodes)), zapDebridService)
+// 	return tcodes, nil
+// }
