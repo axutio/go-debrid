@@ -93,6 +93,24 @@ func (c *Client) GetUser(ctx context.Context) (User, error) {
 	return user, nil
 }
 
+// GetDownloads fetches and returns the user's downloads list
+// this is flawed because it only fetches the first 50 responses
+func (c *Client) GetDownloads(ctx context.Context) ([]Download, error) {
+	c.logger.Debug("Getting downloads...", zapDebridService)
+	
+	resBytes, err := c.get(ctx, c.opts.BaseURL+"/downloads", nil)
+	if err != nil {
+		return []Download{}, fmt.Errorf("couldn't get user: %w", err)
+	}
+	dls := []Download{}
+	if err = json.Unmarshal(resBytes, &dls); err != nil {
+		return []Download{}, fmt.Errorf("couldn't unmarshal user: %w", err)
+	}
+
+	c.logger.Debug("Got downloads", zap.String("downloads", fmt.Sprintf("%+v", dls)), zapDebridService)
+	return dls, nil
+}
+
 // Unrestrict unrestricts a hoster link.
 // For torrents, the torrent must first be added to RealDebrid and a file selected for download, which then leads to such a hoster link.
 // When remote is true, account sharing restrictions are lifted, but it requires separately purchased "sharing traffic".

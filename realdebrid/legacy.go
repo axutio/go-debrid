@@ -14,7 +14,7 @@ import (
 	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
 
-	debrid "github.com/deflix-tv/go-debrid"
+	debrid "github.com/axutio/go-debrid"
 )
 
 type LegacyClientOptions struct {
