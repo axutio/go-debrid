@@ -70,6 +70,18 @@ type Download struct {
 	Streamable int `json:"streamable,omitempty"`
 }
 
+type Transcoding struct {
+	Quality		string	`json:"quality,omitempty"`
+}
+
+// Transcoding represents all of the transcoding links for an unrestricted file
+type Transcodings struct {
+	Apple 		string 	`json:"apple,omitempty"`
+	Dash  		string 	`json:"dash,omitempty"`
+	LiveMP4  	string 	`json:"dash,omitempty"`
+	H264WebM	string 	`json:"h264WebM,omitempty"`
+}
+
 // TorrentsInfo contains info about one element of a list of torrents that was added to RealDebrid for a specific user.
 // It contains download info (progress, selected files) after one or more files of the torrent were selected to be downloaded.
 // It's similar to TorrentInfo, but lacks some fields like OriginalFilename, OriginalBytes and Files.
