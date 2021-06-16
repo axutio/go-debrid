@@ -1,4 +1,4 @@
-module github.com/deflix-tv/go-debrid
+module github.com/axutio/go-debrid
 
 go 1.15
 
