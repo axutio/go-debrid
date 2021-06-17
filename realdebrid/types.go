@@ -70,16 +70,20 @@ type Download struct {
 	Streamable int `json:"streamable,omitempty"`
 }
 
-type Transcoding struct {
-	Full		string	`json:"full,omitempty"`
-}
-
-// Transcoding represents all of the transcoding links for an unrestricted file
+// Transcoding represents the transcodings for a given stream
 type Transcodings struct {
-	Apple 		string 	`json:"apple,omitempty"`
-	Dash  		string 	`json:"dash,omitempty"`
-	LiveMP4  	string 	`json:"dash,omitempty"`
-	H264WebM	string 	`json:"h264WebM,omitempty"`
+	Apple struct {
+		Full string `json:"full"`
+	} `json:"apple"`
+	Dash struct {
+		Full string `json:"full"`
+	} `json:"dash"`
+	LiveMP4 struct {
+		Full string `json:"full"`
+	} `json:"liveMP4"`
+	H264WebM struct {
+		Full string `json:"full"`
+	} `json:"h264WebM"`
 }
 
 // TorrentsInfo contains info about one element of a list of torrents that was added to RealDebrid for a specific user.
