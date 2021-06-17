@@ -71,7 +71,7 @@ type Download struct {
 }
 
 type Transcoding struct {
-	Quality		string	`json:"quality,omitempty"`
+	Full		string	`json:"full,omitempty"`
 }
 
 // Transcoding represents all of the transcoding links for an unrestricted file
