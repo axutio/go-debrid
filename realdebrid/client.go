@@ -276,7 +276,6 @@ func (c *Client) GetStreamTranscodings(ctx context.Context, id string) (Transcod
 	c.logger.Debug("Getting stream transcodings...", zapDebridService)
 
 	resBytes, err := c.get(ctx, c.opts.BaseURL+"/streaming/transcode/"+id[:len(id)-2], nil)
-	fmt.Printf("/streaming/transcode/%+v returned: %+v", id, string(resBytes))
 
 	if err != nil {
 		return Transcodings{}, fmt.Errorf("couldn't get stream transcodings: %w", err)
