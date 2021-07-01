@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/deflix-tv/go-debrid/realdebrid"
+	"github.com/axutio/go-debrid/realdebrid"
 )
 
 // Night of the Living Dead, 1968, public domain (so legal to download, stream and share), from YTS

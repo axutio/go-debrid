@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/deflix-tv/go-debrid/realdebrid"
+	"github.com/axutio/go-debrid/realdebrid"
 )
 
 func main() {
