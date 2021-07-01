@@ -105,10 +105,10 @@ func (c *LegacyClient) TestToken(ctx context.Context, auth Auth) error {
 
 	resBytes, err := c.get(ctx, c.baseURL+"/rest/1.0/user", auth)
 	if err != nil {
-		return fmt.Errorf("Couldn't fetch user info from real-debrid.com with the provided token: %v", err)
+		return fmt.Errorf("couldn't fetch user info from real-debrid.com with the provided token: %v", err)
 	}
 	if !gjson.GetBytes(resBytes, "id").Exists() {
-		return fmt.Errorf("Couldn't parse user info response from real-debrid.com")
+		return fmt.Errorf("couldn't parse user info response from real-debrid.com")
 	}
 
 	c.logger.Debug("Token OK", zapFieldDebridSite, zapFieldAPItoken)
@@ -214,7 +214,7 @@ func (c *LegacyClient) GetStreamURL(ctx context.Context, magnetURL string, auth 
 	data.Set("magnet", magnetURL)
 	resBytes, err := c.post(ctx, c.baseURL+"/rest/1.0/torrents/addMagnet", auth, data)
 	if err != nil {
-		return "", fmt.Errorf("Couldn't add torrent to RealDebrid: %v", err)
+		return "", fmt.Errorf("couldn't add torrent to RealDebrid: %v", err)
 	}
 	c.logger.Debug("Finished adding torrent to RealDebrid", zapFieldDebridSite, zapFieldAPItoken)
 	rdTorrentURL := gjson.GetBytes(resBytes, "uri").String()
@@ -225,24 +225,24 @@ func (c *LegacyClient) GetStreamURL(ctx context.Context, magnetURL string, auth 
 	// Use configured base URL, which could be a proxy that we want to go through
 	rdTorrentURL, err = replaceURL(rdTorrentURL, c.baseURL)
 	if err != nil {
-		return "", fmt.Errorf("Couldn't replace URL which was retrieved from an HTML link: %v", err)
+		return "", fmt.Errorf("couldn't replace URL which was retrieved from an HTML link: %v", err)
 	}
 	resBytes, err = c.get(ctx, rdTorrentURL, auth)
 	if err != nil {
-		return "", fmt.Errorf("Couldn't get torrent info from real-debrid.com: %v", err)
+		return "", fmt.Errorf("couldn't get torrent info from real-debrid.com: %v", err)
 	}
 	torrentID := gjson.GetBytes(resBytes, "id").String()
 	if torrentID == "" {
-		return "", errors.New("Couldn't get torrent info from real-debrid.com: response body doesn't contain \"id\" key")
+		return "", errors.New("couldn't get torrent info from real-debrid.com: response body doesn't contain \"id\" key")
 	}
 	fileResults := gjson.GetBytes(resBytes, "files").Array()
 	if len(fileResults) == 0 || (len(fileResults) == 1 && fileResults[0].Raw == "") {
-		return "", errors.New("Couldn't get torrent info from real-debrid.com: response body doesn't contain \"files\" key")
+		return "", errors.New("couldn't get torrent info from real-debrid.com: response body doesn't contain \"files\" key")
 	}
 	// TODO: Not required if we pass the instant available file ID from the availability check, but probably no huge performance implication
 	fileID, err := selectFileID(ctx, fileResults)
 	if err != nil {
-		return "", fmt.Errorf("Couldn't find proper file in torrent: %v", err)
+		return "", fmt.Errorf("couldn't find proper file in torrent: %v", err)
 	}
 	c.logger.Debug("Torrent info OK", zapFieldDebridSite, zapFieldAPItoken)
 
@@ -253,7 +253,7 @@ func (c *LegacyClient) GetStreamURL(ctx context.Context, magnetURL string, auth 
 	data.Set("files", fileID)
 	_, err = c.post(ctx, c.baseURL+"/rest/1.0/torrents/selectFiles/"+torrentID, auth, data)
 	if err != nil {
-		return "", fmt.Errorf("Couldn't add torrent to RealDebrid downloads: %v", err)
+		return "", fmt.Errorf("couldn't add torrent to RealDebrid downloads: %v", err)
 	}
 	c.logger.Debug("Finished adding torrent to RealDebrid downloads", zapFieldDebridSite, zapFieldAPItoken)
 
@@ -266,7 +266,7 @@ func (c *LegacyClient) GetStreamURL(ctx context.Context, magnetURL string, auth 
 	for torrentStatus != "downloaded" {
 		resBytes, err = c.get(ctx, rdTorrentURL, auth)
 		if err != nil {
-			return "", fmt.Errorf("Couldn't get torrent info from real-debrid.com: %v", err)
+			return "", fmt.Errorf("couldn't get torrent info from real-debrid.com: %v", err)
 		}
 		torrentStatus = gjson.GetBytes(resBytes, "status").String()
 		// Stop immediately if an error occurred.
@@ -275,7 +275,7 @@ func (c *LegacyClient) GetStreamURL(ctx context.Context, magnetURL string, auth 
 			torrentStatus == "error" ||
 			torrentStatus == "virus" ||
 			torrentStatus == "dead" {
-			return "", fmt.Errorf("Bad torrent status: %v", torrentStatus)
+			return "", fmt.Errorf("bad torrent status: %v", torrentStatus)
 		}
 		// If status is before downloading (magnet_conversion, queued) or downloading, only wait 5 seconds
 		// Note: This first condition also matches on waiting_files_selection, compressing and uploading, but these should never occur (we already selected a file and we're not uploading/compressing anything), but in case for some reason they match, well ok wait for 5 seconds as well.
@@ -289,7 +289,7 @@ func (c *LegacyClient) GetStreamURL(ctx context.Context, magnetURL string, auth 
 			} else {
 				zapFieldWaited := zap.String("waited", strconv.Itoa(waitForDownloadSeconds)+"s")
 				c.logger.Debug("Torrent not downloading yet", zapFieldWaited, zapFieldTorrentStatus, zapFieldDebridSite, zapFieldAPItoken)
-				return "", fmt.Errorf("Torrent still waiting for download (currently %v) on real-debrid.com after waiting for %v seconds", torrentStatus, waitForDownloadSeconds)
+				return "", fmt.Errorf("torrent still waiting for download (currently %v) on real-debrid.com after waiting for %v seconds", torrentStatus, waitForDownloadSeconds)
 			}
 		} else if torrentStatus == "downloading" {
 			if waitedForDownloadSeconds < waitForDownloadSeconds {
@@ -299,7 +299,7 @@ func (c *LegacyClient) GetStreamURL(ctx context.Context, magnetURL string, auth 
 			} else {
 				zapFieldWaited := zap.String("waited", strconv.Itoa(waitForDownloadSeconds)+"s")
 				c.logger.Debug("Torrent still downloading", zapFieldWaited, zapFieldTorrentStatus, zapFieldDebridSite, zapFieldAPItoken)
-				return "", fmt.Errorf("Torrent still %v on real-debrid.com after waiting for %v seconds", torrentStatus, waitForDownloadSeconds)
+				return "", fmt.Errorf("torrent still %v on real-debrid.com after waiting for %v seconds", torrentStatus, waitForDownloadSeconds)
 			}
 		}
 		time.Sleep(time.Second)
@@ -317,7 +317,7 @@ func (c *LegacyClient) GetStreamURL(ctx context.Context, magnetURL string, auth 
 	}
 	resBytes, err = c.post(ctx, c.baseURL+"/rest/1.0/unrestrict/link", auth, data)
 	if err != nil {
-		return "", fmt.Errorf("Couldn't unrestrict link: %v", err)
+		return "", fmt.Errorf("couldn't unrestrict link: %v", err)
 	}
 	streamURL := gjson.GetBytes(resBytes, "download").String()
 	c.logger.Debug("Unrestricted link", zap.String("unrestrictedLink", streamURL), zapFieldDebridSite, zapFieldAPItoken)
@@ -328,7 +328,7 @@ func (c *LegacyClient) GetStreamURL(ctx context.Context, magnetURL string, auth 
 func (c *LegacyClient) get(ctx context.Context, url string, auth Auth) ([]byte, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("Couldn't create GET request: %v", err)
+		return nil, fmt.Errorf("couldn't create GET request: %v", err)
 	}
 
 	req.Header.Set("Authorization", "Bearer "+auth.KeyOrToken)
@@ -339,16 +339,16 @@ func (c *LegacyClient) get(ctx context.Context, url string, auth Auth) ([]byte, 
 	c.logger.Debug("Sending request to RealDebrid", zap.String("request", fmt.Sprintf("%+v", req)))
 	res, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("Couldn't send GET request: %v", err)
+		return nil, fmt.Errorf("couldn't send GET request: %v", err)
 	}
 	defer res.Body.Close()
 
 	// Check server response
 	if res.StatusCode != http.StatusOK {
 		if res.StatusCode == http.StatusUnauthorized {
-			return nil, fmt.Errorf("Invalid token")
+			return nil, fmt.Errorf("invalid token")
 		} else if res.StatusCode == http.StatusForbidden {
-			return nil, fmt.Errorf("Account locked")
+			return nil, fmt.Errorf("account locked")
 		}
 		resBody, _ := ioutil.ReadAll(res.Body)
 		if len(resBody) == 0 {
@@ -370,7 +370,7 @@ func (c *LegacyClient) post(ctx context.Context, url string, auth Auth, data url
 	}
 	req, err := http.NewRequest("POST", url, strings.NewReader(data.Encode()))
 	if err != nil {
-		return nil, fmt.Errorf("Couldn't create POST request: %v", err)
+		return nil, fmt.Errorf("couldn't create POST request: %v", err)
 	}
 	req.Header.Set("Authorization", "Bearer "+auth.KeyOrToken)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -381,7 +381,7 @@ func (c *LegacyClient) post(ctx context.Context, url string, auth Auth, data url
 	c.logger.Debug("Sending request to RealDebrid", zap.String("request", fmt.Sprintf("%+v", req)))
 	res, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("Couldn't send POST request: %v", err)
+		return nil, fmt.Errorf("couldn't send POST request: %v", err)
 	}
 	defer res.Body.Close()
 
@@ -391,9 +391,9 @@ func (c *LegacyClient) post(ctx context.Context, url string, auth Auth, data url
 		res.StatusCode != http.StatusNoContent &&
 		res.StatusCode != http.StatusOK {
 		if res.StatusCode == http.StatusUnauthorized {
-			return nil, fmt.Errorf("Invalid token")
+			return nil, fmt.Errorf("invalid token")
 		} else if res.StatusCode == http.StatusForbidden {
-			return nil, fmt.Errorf("Account locked")
+			return nil, fmt.Errorf("account locked")
 		}
 		resBody, _ := ioutil.ReadAll(res.Body)
 		if len(resBody) == 0 {
@@ -408,7 +408,7 @@ func (c *LegacyClient) post(ctx context.Context, url string, auth Auth, data url
 func selectFileID(ctx context.Context, fileResults []gjson.Result) (string, error) {
 	// Precondition check
 	if len(fileResults) == 0 {
-		return "", fmt.Errorf("Empty slice of files")
+		return "", fmt.Errorf("empty slice of files")
 	}
 
 	var fileID int64 // ID inside JSON starts with 1
@@ -421,7 +421,7 @@ func selectFileID(ctx context.Context, fileResults []gjson.Result) (string, erro
 	}
 
 	if fileID == 0 {
-		return "", fmt.Errorf("No file ID found")
+		return "", fmt.Errorf("no file ID found")
 	}
 
 	return strconv.FormatInt(fileID, 10), nil
@@ -431,7 +431,7 @@ func replaceURL(origURL, newBaseURL string) (string, error) {
 	// Replace by configured URL, which could be a proxy that we want to go through
 	url, err := url.Parse(origURL)
 	if err != nil {
-		return "", fmt.Errorf("Couldn't parse URL. URL: %v; error: %v", origURL, err)
+		return "", fmt.Errorf("couldn't parse URL. URL: %v; error: %v", origURL, err)
 	}
 	origBaseURL := url.Scheme + "://" + url.Host
 	return strings.Replace(origURL, origBaseURL, newBaseURL, 1), nil
